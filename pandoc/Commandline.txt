@@ -1,5 +1,7 @@
 pandoc input.docx -t markdown_strict -o input.md --lua-filter=..\..\ArchiveAutomation\pandoc\process-submission.lua --standalone
 
+pandoc input.md -s -o output.html --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --lua-filter=..\..\ArchiveAutomation\pandoc\website-adjustment.lua --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua --template=..\..\ArchiveAutomation\pandoc\story-template.html
+
 Use a temporary markdown file for structuring the Word files
 pandoc input.md -s -o input-office.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --template=..\..\ArchiveAutomation\pandoc\story-template-office.md
 pandoc input-office.md -s -o output.docx --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.docx --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
