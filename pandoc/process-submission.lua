@@ -40,18 +40,19 @@ local first_line = nil
 function Para(el)
 
   local text = pandoc.utils.stringify(el)
+  local text_without_whitespace = remove_whitespace(text)
 
   -- strip empty paragraphs
-  if string.len(remove_whitespace(text)) == 0 then
+  if string.len(text_without_whitespace) == 0 then
     return {}
   end	
 
   -- Whitelist known content lines without word-characters
-  if text == "…" or text == "..." then -- elipsis
+  if text_without_whitespace == "…" or text_without_whitespace == "..." then -- elipsis
     return el
-  elseif text == "?" or text == "!" then -- punctuation mark
+  elseif text_without_whitespace == "?" or text_without_whitespace == "!" then -- punctuation mark
     return el
-  elseif text == "-" or text == "–" or text == "—" then -- dash
+  elseif text_without_whitespace == "-" or text_without_whitespace == "–" or text_without_whitespace == "—" then -- dash
     return el
   -- Check if the paragraph consists of mostly non-word characters
   elseif text:match("^%W+$") then 
@@ -269,7 +270,7 @@ end
 
 
 function remove_whitespace(s)
-  return s:gsub("%s+", "")  -- Replace all whitespace with an empty string
+  return s:gsub("[%s\u{00A0}]+", "")  -- Replace all whitespace with an empty string
 end
 
 
