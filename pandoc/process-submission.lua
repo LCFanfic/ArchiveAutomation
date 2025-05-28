@@ -118,9 +118,12 @@ function Para(el)
     return {}
   elseif paragraph_count == 7 and first_line then
     summary = first_line
-	first_line = nil
+	  first_line = nil
     return el
   else
+    if has_linebreaks(el) then
+      io.stderr:write("Warning: linebreaks detected in paragraph " .. paragraph_count .. ".\n")
+    end
     return el
   end
 
