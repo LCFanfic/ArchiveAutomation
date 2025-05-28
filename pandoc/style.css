@@ -54,7 +54,7 @@ h1 + p,
 h2 + p,
 div.horizontalrule + p
 {
-  text-indent: revert;
+  text-indent: 0;
 }
 
 p
