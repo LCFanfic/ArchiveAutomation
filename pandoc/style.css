@@ -47,7 +47,7 @@ p
   text-indent: 1em; 
 }
 
-div.title,
+div.title p,
 div.author p,
 div.metadata p,
 h1 + p,
