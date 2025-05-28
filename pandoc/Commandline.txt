@@ -1,0 +1,24 @@
+pandoc input.docx -t markdown_strict -o input.md --lua-filter=process-submission.lua --standalone
+
+Use a temporary markdown file for structuring the Word files
+pandoc input.md -s -o input-office.md --lua-filter=authors.lua --template=story-template-office.md
+pandoc input-office.md -s -o output.docx --reference-doc=pandoc-reference.docx --lua-filter=custom-hr.lua
+pandoc input-office.md -s -o output.odt --reference-doc=pandoc-reference.odt --lua-filter=custom-hr.lua
+
+pandoc input.md -s -o input-ebook.md --lua-filter=authors.lua --template=story-template-ebook.md
+pandoc input-ebook.md -s -o output.epub --lua-filter=custom-hr.lua --css style.css --epub-cover-image=cover.png --epub-title-page=false
+
+pandoc input.md -s -o output.html --ascii
+  if we want encoded characters.
+  
+Convert to to kindle:
+ebook-convert .\output.epub output.mobi
+
+use TYPST for PDF
+$env:TYPST_FONT_PATHS="./fonts"
+pandoc input.md --wrap=none --pdf-engine=typst --template=pandoc-md-typst.template -o output.pdf
+
+
+
+Kindle Previewer
+https://kdp.amazon.com/en_US/help/topic/G202131170

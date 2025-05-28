@@ -1,0 +1,149 @@
+body 
+{ 
+  margin: 0; 
+  text-align: justify; 
+  font-size: medium; 
+  font-family: 'Times New Roman', 'Liberation Serif', serif; 
+}
+
+h1,
+h2,
+div.title,
+div.author
+{ 
+  text-align: center; 
+}
+
+div.title
+{
+  font-size: 150%;
+  font-weight: bold;
+}
+
+h1
+{
+  font-size: 125%;
+}
+
+h2,
+div.author
+{
+  font-size: 100%;
+  font-weight: bold;
+}
+
+div.metadata
+{
+  text-align: justify;
+}
+
+h1.hidden-h1
+{
+  display: none;
+}
+
+p
+{
+  text-indent: 1em; 
+}
+
+div.title,
+div.author p,
+div.metadata p,
+h1 + p,
+h2 + p,
+div.horizontalrule + p
+{
+  text-indent: revert;
+}
+
+p
+{
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+}
+
+div.horizontalrule 
+{
+  margin: 1em;
+  text-align: center;
+}
+
+ol.toc 
+{ 
+  padding: 0; 
+  margin-left: 1em; 
+}
+
+ol.toc li 
+{ 
+  list-style-type: none; 
+  margin: 0; 
+  padding: 0; 
+}
+
+h1,
+h2,
+div.title,
+div.author
+{ 
+  -epub-hyphens: none; 
+  -webkit-hyphens: none; 
+  -moz-hyphens: none; 
+  hyphens: none; 
+}
+
+p,
+blockquote 
+{ 
+  orphans: 2; 
+  widows: 2; 
+}
+
+p,
+figcaption 
+{ 
+  -epub-hyphens: auto; 
+  -webkit-hyphens: auto; 
+  -moz-hyphens: auto; 
+  hyphens: auto; 
+}
+
+h1, 
+h2,
+div.title, 
+table, 
+img, 
+figure,
+[data-page-break~=inside][data-page-break~=avoid] 
+{ 
+  page-break-inside: avoid; 
+}
+
+[data-page-break~=after]                         
+{ 
+  page-break-after: always; 
+}
+
+h1, 
+h2,
+div.Title, 
+[data-page-break~=after][data-page-break~=avoid]  
+{ 
+  page-break-after: avoid; 
+}
+
+[data-page-break~=before]                        
+{ 
+  page-break-before: always; 
+}
+
+[data-page-break~=before][data-page-break~=avoid] 
+{ 
+  page-break-before: avoid; 
+}
+
+img[data-page-break~=before]                      
+{ 
+  page-break-before: left; 
+}
