@@ -21,6 +21,7 @@ Rated: $rating$
 Summary: $summary$
 
 Story Size: $length.words$ words ($length.text$ as text)
+:::
 
 ***
 
@@ -29,7 +30,6 @@ $preface$
 
 ***
 $endif$
-:::
 
 $if(first_heading)$
 $else$
