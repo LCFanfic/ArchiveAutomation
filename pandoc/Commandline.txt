@@ -7,7 +7,7 @@ pandoc input.md -s -o input-office.md --lua-filter=..\..\ArchiveAutomation\pando
 pandoc input-office.md -s -o output.docx --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.docx --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
 pandoc input-office.md -s -o output.odt --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.odt --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
 
-pandoc input.md -s -o input-ebook.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --template=..\..\ArchiveAutomation\pandoc\story-template-ebook.md
+pandoc input.md -s -o input-ebook.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --lua-filter=..\..\ArchiveAutomation\pandoc\extract-preface.lua --template=..\..\ArchiveAutomation\pandoc\story-template-ebook.md
 pandoc input-ebook.md -s -o output.epub --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua --css=..\..\ArchiveAutomation\pandoc\style.css --epub-cover-image=cover.png --epub-title-page=false
 
 pandoc input.md -s -o output.html --ascii

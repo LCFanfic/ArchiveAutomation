@@ -1,5 +1,6 @@
 ---
-title: $title$
+title: >
+    $title$
 ---
 
 ::: {custom-style="Author"}

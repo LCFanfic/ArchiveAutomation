@@ -1,5 +1,6 @@
 ---
-title: $title$
+title: >
+    $title$
 ---
 
 # Preface {.hidden-h1}
@@ -20,7 +21,6 @@ Rated: $rating$
 Summary: $summary$
 
 Story Size: $length.words$ words ($length.text$ as text)
-:::
 
 ***
 

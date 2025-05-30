@@ -4,8 +4,8 @@ local paragraph_count = 0
 
 function Para(el)
   paragraph_count = paragraph_count + 1
-  if paragraph_count == 1 then
-    -- summary is a paragraph element and always the first Para in the document.
+  if paragraph_count <= 2 then
+    -- title and summary are paragraph elements and always the first and second Para in the document.
     return el
   end
 

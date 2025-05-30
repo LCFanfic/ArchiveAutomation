@@ -20,10 +20,6 @@ function Header(el)
     title = pandoc.MetaString(text)
 	return {}
   end
-  if not title then
-    title = pandoc.MetaString(text)
-	return {}
-  end
 
   if not heading_level then
     heading_level = el.level
@@ -136,7 +132,7 @@ function Pandoc(doc)
   local yaml_frontmatter = "---\n"
 
   if title then
-    yaml_frontmatter = yaml_frontmatter .. "title: " .. title .. "\n"
+    yaml_frontmatter = yaml_frontmatter .. "title: >\n" .. wrap_text(title, 80, 4) .. "\n"
   end
 
   if author then
@@ -172,7 +168,7 @@ function Pandoc(doc)
   yaml_frontmatter = yaml_frontmatter .. "  text: " .. length_in_bytes_formatted .. "\n"
 
   if summary then
-    yaml_frontmatter = yaml_frontmatter .. "summary: |\n" .. wrap_text(summary, 80, 4) .. "\n"
+    yaml_frontmatter = yaml_frontmatter .. "summary: >\n" .. wrap_text(summary, 80, 4) .. "\n"
   end
 
   yaml_frontmatter = yaml_frontmatter .. "---\n"
