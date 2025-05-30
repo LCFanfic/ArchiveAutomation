@@ -24,4 +24,16 @@ Story Size: $length.words$ words ($length.text$ as text)
 
 ***
 
+$if(preface)$
+$preface$
+
+***
+$endif$
+:::
+
+$if(first_heading)$
+$else$
+# Story {.hidden-h1}
+$endif$
+
 $body$
