@@ -47,6 +47,8 @@ function Para(el)
     return {}
   end	
 
+  el.content = trim_trailing_nbsp(el.content)
+
   -- Whitelist known content lines without word-characters
   if text_without_whitespace == "…" or text_without_whitespace == "..." then -- elipsis
     return el
@@ -285,4 +287,26 @@ function has_linebreaks(el)
   end
 
   return false
+end
+
+function trim_trailing_nbsp(inlines)
+  -- Iterate in reverse to remove trailing nbsp
+  for i = #inlines, 1, -1 do
+    local item = inlines[i]
+    if item.t == "Str" then
+      inlines[i] = pandoc.utils.stringify(item):gsub("[%s\u{00A0}]+$", "") -- Trim trailing spaces
+
+      -- Remove empty strings if trimming made them empty
+      if inlines[i] == "" then
+        table.remove(inlines, i)
+      else
+        break -- Stop processing when a valid non-whitespace character remains
+      end
+    elseif item.t == "Space" then
+      table.remove(inlines, i) -- Remove trailing Space elements
+    else
+      break -- Stop processing when encountering a non-space element
+    end
+  end
+  return inlines
 end
