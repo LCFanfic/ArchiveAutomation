@@ -1,12 +1,12 @@
-pandoc input.docx -t markdown_strict -o input.md --lua-filter=process-submission.lua --standalone
+pandoc input.docx -t markdown_strict -o input.md --lua-filter=..\..\ArchiveAutomation\pandoc\process-submission.lua --standalone
 
 Use a temporary markdown file for structuring the Word files
-pandoc input.md -s -o input-office.md --lua-filter=authors.lua --template=story-template-office.md
-pandoc input-office.md -s -o output.docx --reference-doc=pandoc-reference.docx --lua-filter=custom-hr.lua
-pandoc input-office.md -s -o output.odt --reference-doc=pandoc-reference.odt --lua-filter=custom-hr.lua
+pandoc input.md -s -o input-office.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --template=..\..\ArchiveAutomation\pandoc\story-template-office.md
+pandoc input-office.md -s -o output.docx --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.docx --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
+pandoc input-office.md -s -o output.odt --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.odt --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
 
-pandoc input.md -s -o input-ebook.md --lua-filter=authors.lua --template=story-template-ebook.md
-pandoc input-ebook.md -s -o output.epub --lua-filter=custom-hr.lua --css style.css --epub-cover-image=cover.png --epub-title-page=false
+pandoc input.md -s -o input-ebook.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --template=..\..\ArchiveAutomation\pandoc\story-template-ebook.md
+pandoc input-ebook.md -s -o output.epub --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua --css=..\..\ArchiveAutomation\pandoc\style.css --epub-cover-image=cover.png --epub-title-page=false
 
 pandoc input.md -s -o output.html --ascii
   if we want encoded characters.
@@ -15,8 +15,8 @@ Convert to to kindle:
 ebook-convert .\output.epub output.mobi
 
 use TYPST for PDF
-$env:TYPST_FONT_PATHS="./fonts"
-pandoc input.md --wrap=none --pdf-engine=typst --template=pandoc-md-typst.template -o output.pdf
+$env:TYPST_FONT_PATHS="./../../ArchiveAutomation/pandoc/fonts"
+pandoc input.md --wrap=none --pdf-engine=typst --template=..\..\ArchiveAutomation\pandoc\pandoc-md-typst.template --lua-filter=..\..\ArchiveAutomation\pandoc\extract-preface.lua -o output.pdf
 
 
 
