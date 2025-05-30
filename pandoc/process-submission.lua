@@ -136,7 +136,13 @@ function Pandoc(doc)
   end
 
   if author then
-    yaml_frontmatter = yaml_frontmatter .. "author: " .. author .. "\n"
+    local authors = process_authors(author)
+    yaml_frontmatter = yaml_frontmatter .. "author: \n"
+    for _, v in ipairs(authors) do
+      yaml_frontmatter = yaml_frontmatter .. "  - name: "  .. v.name .. "\n"
+      yaml_frontmatter = yaml_frontmatter .. "    email: " .. v.email .. "\n"
+      yaml_frontmatter = yaml_frontmatter .. "    url: "   .. v.url .. "\n"
+    end  
   end
 
   if rating then
@@ -180,6 +186,21 @@ function Pandoc(doc)
 end
 
 
+function process_authors (value)
+  local result = {}
+  value = string.gsub(value, " and ", ", ")
+
+  for name_and_email in value:gmatch("[^,]+") do
+    local name, email = name_and_email:match("^(.*)%s+(%S+)$") -- Split on last space
+    name = name:match("^%W*(.-%.?)%W*$") -- Trim all non-alphanumerics. Keep the trailing period.
+    email = email:match("^%W*(.-)%W*$") -- Trim all non-alphanumerics.
+    url = ""
+    table.insert(result, {name = name, email = email, url = url})
+  end
+  return result
+end
+
+
 function wrap_text(text, width, indent)
   local wrapped = ""
   local line = ""
@@ -197,6 +218,7 @@ function wrap_text(text, width, indent)
   wrapped = wrapped .. indent_text .. line
   return wrapped
 end
+
 
 function count_words_in_doc(doc)
   local word_count = 0
