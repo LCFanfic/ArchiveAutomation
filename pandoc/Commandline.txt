@@ -1,4 +1,4 @@
-pandoc input.docx -t markdown_strict -o input.md --lua-filter=..\..\ArchiveAutomation\pandoc\process-submission.lua --standalone
+pandoc input.docx -t markdown_strict -o input.md --lua-filter=..\..\ArchiveAutomation\pandoc\process-submission.lua --standalone -M authorstable='..\authors.json'
 
 pandoc input.md -s -o output.html --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --lua-filter=..\..\ArchiveAutomation\pandoc\website-adjustment.lua --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua --template=..\..\ArchiveAutomation\pandoc\story-template.html
 

@@ -1,8 +1,11 @@
+local json = require 'pandoc.json'
+
 local title = nil
 local author = nil
 local submission_date = nil
 local rating = nil
 local summary = nil
+local authors_table_file = nil
 
 -- Extract the first header into the title metadata and remove it from the document
 -- Check that the remaning headers all have the same level and set the level to "Header 1"
@@ -127,6 +130,13 @@ function Para(el)
 
 end
 
+function Meta (meta)
+  authors_table_file = meta.authorstable
+  if not authors_table_file then
+    io.stderr:write("Warning: No authors file has been provided via 'authorstable' metadata.\n")
+  end
+  return meta
+end
 
 function Pandoc(doc)
   local yaml_frontmatter = "---\n"
@@ -136,7 +146,8 @@ function Pandoc(doc)
   end
 
   if author then
-    local authors = process_authors(author)
+    local authors_table = read_json_file(authors_table_file)
+    local authors = process_authors(author, authors_table)
     yaml_frontmatter = yaml_frontmatter .. "author: \n"
     for _, v in ipairs(authors) do
       yaml_frontmatter = yaml_frontmatter .. "  - name: "  .. v.name .. "\n"
@@ -186,16 +197,22 @@ function Pandoc(doc)
 end
 
 
-function process_authors (value)
+function process_authors (value, authors_table)
   local result = {}
   value = string.gsub(value, " and ", ", ")
-
   for name_and_email in value:gmatch("[^,]+") do
     local name, email = name_and_email:match("^(.*)%s+(%S+)$") -- Split on last space
     name = name:match("^%W*(.-%.?)%W*$") -- Trim all non-alphanumerics. Keep the trailing period.
-    email = email:match("^%W*(.-)%W*$") -- Trim all non-alphanumerics.
-    url = ""
-    table.insert(result, {name = name, email = email, url = url})
+    email = string.lower(email:match("^%W*(.-)%W*$")) -- Trim all non-alphanumerics.
+
+    local author = authors_table[email]
+    if not author then
+      io.stderr:write("Warning: No author found for e-mail '" .. email .. "'.\n")
+      author = {name = name, email = email, url = ""}
+    end
+    author.email = email
+
+    table.insert(result, author)
   end
   return result
 end
@@ -242,6 +259,7 @@ function count_words_in_doc(doc)
 
   return word_count
 end
+
 
 function count_characters_in_doc(doc)
   local char_count = 0
@@ -307,6 +325,7 @@ function has_linebreaks(el)
   return false
 end
 
+
 function trim_trailing_nbsp(inlines)
   -- Iterate in reverse to remove trailing nbsp
   for i = #inlines, 1, -1 do
@@ -327,4 +346,22 @@ function trim_trailing_nbsp(inlines)
     end
   end
   return inlines
+end
+
+
+function read_json_file(filename)
+  if not filename then
+    io.stderr:write("Warning: Could not open file because filename is nil.\n")
+    return {}
+  end
+
+  local file = io.open(filename, "r")
+  if not file then
+    io.stderr:write("Warning: Could not open file '" .. filename .. "'.\n")
+    return {}
+  end  
+
+  local content = file:read("*a")
+  file:close()
+  return json.decode(content)
 end
