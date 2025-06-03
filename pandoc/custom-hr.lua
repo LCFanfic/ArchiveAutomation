@@ -20,6 +20,8 @@ function HorizontalRule ()
     return pandoc.RawBlock('html', horizontalRuleHtml)
   elseif FORMAT == 'html' then
     return pandoc.RawBlock('html', horizontalRuleHtml)
+  elseif FORMAT == 'txt' then
+    return pandoc.RawBlock('txt', "***")
   else
     return pandoc.Para({pandoc.Str("***")})
   end

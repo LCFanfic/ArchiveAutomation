@@ -6,6 +6,7 @@ Use a temporary markdown file for structuring the Word files
 pandoc input.md -s -o input-office.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --template=..\..\ArchiveAutomation\pandoc\story-template-office.md
 pandoc input-office.md -s -o output.docx --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.docx --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
 pandoc input-office.md -s -o output.odt --reference-doc=..\..\ArchiveAutomation\pandoc\pandoc-reference.odt --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua
+pandoc input-office.md -s -o output.txt -t plain -f markdown-smart --columns=65 --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua  --lua-filter="..\..\ArchiveAutomation\pandoc\escape-plaintext.lua"
 
 pandoc input.md -s -o input-ebook.md --lua-filter=..\..\ArchiveAutomation\pandoc\authors.lua --lua-filter=..\..\ArchiveAutomation\pandoc\extract-preface.lua --lua-filter=..\..\ArchiveAutomation\pandoc\heading-finder.lua --template=..\..\ArchiveAutomation\pandoc\story-template-ebook.md
 pandoc input-ebook.md -s -o output.epub --lua-filter=..\..\ArchiveAutomation\pandoc\custom-hr.lua --css=..\..\ArchiveAutomation\pandoc\style.css --epub-cover-image=cover.png --epub-title-page=false
