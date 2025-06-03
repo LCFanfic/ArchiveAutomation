@@ -15,13 +15,13 @@ function Meta(meta)
     local formatted_authors_string = nil  
     if #formatted_authors_array == 0 then
 	  formatted_authors_string = ""
-	elseif #formatted_authors_array == 1 then
-	  formatted_authors_string = formatted_authors_array[1]
-	elseif #formatted_authors_array == 2 then
-      formatted_authors_string = formatted_authors_array[1] .. "\\\nand " .. formatted_authors_array[2]
-	else
+    elseif #formatted_authors_array == 1 then
+      formatted_authors_string = formatted_authors_array[1]
+    elseif #formatted_authors_array == 2 then
+      formatted_authors_string = formatted_authors_array[1] .. "and\\\n" .. formatted_authors_array[2]
+    else
       formatted_authors_string = table.concat(formatted_authors_array, ",\\\n", 1, #formatted_authors_array-1)
-                                 .. ",\\\nand " .. formatted_authors_array[#formatted_authors_array]
+                                 .. ", and\\\n" .. formatted_authors_array[#formatted_authors_array]
 	end
 
     meta.authors_formatted =  pandoc.RawInline("markdown", formatted_authors_string)
