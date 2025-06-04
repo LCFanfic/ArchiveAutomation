@@ -23,12 +23,8 @@ Summary: $summary$
 Story Size: $length.words$ words ($length.text$ as text)
 :::
 
-***
-
 $if(preface)$
 $preface$
-
-***
 $endif$
 
 $if(first_heading)$
