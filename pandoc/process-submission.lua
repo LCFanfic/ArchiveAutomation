@@ -6,6 +6,7 @@ local submission_date = nil
 local rating = nil
 local summary = nil
 local authors_table_file = nil
+local filename = nil
 
 -- Extract the first header into the title metadata and remove it from the document
 -- Check that the remaning headers all have the same level and set the level to "Header 1"
@@ -135,11 +136,23 @@ function Meta (meta)
   if not authors_table_file then
     io.stderr:write("Warning: No authors file has been provided via 'authorstable' metadata.\n")
   end
+
+  filename = meta.filename
+  if not filename then
+    io.stderr:write("Warning: No file name has been provided via 'filename' metadata.\n")
+  end
+
   return meta
 end
 
 function Pandoc(doc)
   local yaml_frontmatter = "---\n"
+ 
+  if filename then
+    yaml_frontmatter = yaml_frontmatter .. "filename: " .. filename .. "\n"
+  else
+    yaml_frontmatter = yaml_frontmatter .. "filename: input\n"
+  end
 
   if title then
     yaml_frontmatter = yaml_frontmatter .. "title: >\n" .. wrap_text(title, 80, 4) .. "\n"
@@ -165,7 +178,7 @@ function Pandoc(doc)
     yaml_frontmatter = yaml_frontmatter .. "date: " .. string.format("%04d-%02d-%02d", parsed_date.year, parsed_date.month, parsed_date.day) .. "\n"
     yaml_frontmatter = yaml_frontmatter .. "dateformatted: " .. submission_date .. "\n"
   end
- 
+
   local length_in_words = count_words_in_doc(doc)
   local length_in_words_formatted = format_number(length_in_words)
 
