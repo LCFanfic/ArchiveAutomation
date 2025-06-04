@@ -65,8 +65,12 @@ function Para(el)
   
   paragraph_count = paragraph_count + 1
 
+  if paragraph_count == 1 then
+    print("First six paragraphs:")
+  end
+
   if paragraph_count < 7 then
-  io.stderr:write(paragraph_count .. " " .. text .. "\n")
+    print(paragraph_count .. " " .. text)
   end
 
   -- Extract the author, rating, summission date, and summary
