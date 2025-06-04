@@ -1,6 +1,10 @@
 ---
 title: >
     $title$
+    
+author: $authornames_formatted$
+date: $date$
+publisher: Lois & Clark Fanfic Archive
 ---
 
 # Preface {.hidden-h1}
