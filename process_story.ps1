@@ -128,6 +128,11 @@ if (-not (Get-Command "ebook-convert" -ErrorAction SilentlyContinue)) {
   exit 1
 }
 
+if (-not (Get-Command "typst" -ErrorAction SilentlyContinue)) {
+  Write-Error "'typst' is not available in system PATH. Install Typst (https://github.com/typst/typst/releases/)."
+  exit 1
+}
+
 $extensionOne = [System.IO.Path]::GetExtension($InputFileOne).ToLower()
 $extensionTwo = [System.IO.Path]::GetExtension($InputFileTwo).ToLower()
 
