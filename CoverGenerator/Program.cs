@@ -113,7 +113,7 @@ public class Program
       }
 
       using var shader = SKShader.CreateLinearGradient(
-          start: new SKPoint(0, wordY - font.Metrics.XMax),
+          start: new SKPoint(0, wordY - font.Metrics.CapHeight),
           end: new SKPoint(0, wordY + font.Metrics.Bottom),
           colors,
           null,
