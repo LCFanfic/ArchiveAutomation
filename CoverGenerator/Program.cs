@@ -105,14 +105,14 @@ public class Program
 
     foreach (var line in lines)
     {
-      for (int i = 1; i <= 1; i++)
+      for (int i = 1; i <= 4; i++)
       {
         using var shadowFilter = SKImageFilter.CreateDropShadowOnly(
             dx: (float)(Math.Floor(font.Metrics.XMax * 0.01f) + i),
             dy: (float)(Math.Floor(font.Metrics.XMax * 0.01f) + i),
             sigmaX: 0,
             sigmaY: 0,
-            color: SKColors.White,
+            color: SKColors.Black,
             input: null
             );
         using var shadowPaint = new SKPaint { IsAntialias = true, ImageFilter = shadowFilter };
