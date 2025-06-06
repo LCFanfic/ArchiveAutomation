@@ -39,7 +39,14 @@ public class Program
     DrawSingleLineText(canvas, publisher, publisherArea, SKTextAlign.Center, fontPublisher, SKColors.White);
 
     using var image = surface.Snapshot();
-    using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+
+    var imageFormat = Path.GetExtension(outputPath).ToLower() switch
+    {
+        ".jpg" => SKEncodedImageFormat.Jpeg,
+        ".png" => SKEncodedImageFormat.Png,
+        _ => SKEncodedImageFormat.Png
+    };
+    using var data = image.Encode(imageFormat, 95);
     using var outputStream = File.OpenWrite(outputPath);
     data.SaveTo(outputStream);
   }
