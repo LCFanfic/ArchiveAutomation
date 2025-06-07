@@ -70,37 +70,27 @@ public class Program
   {
     var lines = new Queue<string>();
 
-    if (font.MeasureText(text) < rect.Size.Width * 0.8)
+    const int c_maxLines = 3;
+    for (int lineCount = 1; lineCount <= c_maxLines && lines.Count == 0; lineCount++)
     {
-      lines.Enqueue(text);
-    }
-
-    if (lines.Count == 0)
-    {
-      var firstWhitespaceAfterHalfwayPoint = text.IndexOf(' ', text.Length / 2);
-      var firstLine = text.Substring(0, firstWhitespaceAfterHalfwayPoint);
-      var secondLine = text.Substring(firstWhitespaceAfterHalfwayPoint + 1);
-      if (font.MeasureText(firstLine) < rect.Size.Width * 0.8)
+      var maxWidth = lineCount < c_maxLines ? rect.Size.Width * 0.8 : rect.Size.Width;
+      var startIndexOfCurrentLine = 0;
+      for (int i = 1; i <= lineCount; i++)
       {
-        lines.Enqueue(firstLine);
-        lines.Enqueue(secondLine);
+        var startIndexForFirstWhitespaceAfterCurrentLine = startIndexOfCurrentLine + text.Length / lineCount;
+        var firstWhiteSpaceAfterCurrentLine =
+            startIndexForFirstWhitespaceAfterCurrentLine < text.Length ? text.IndexOf(' ', startIndexForFirstWhitespaceAfterCurrentLine) : -1;
+
+        var currentLine = text.Substring(
+            startIndexOfCurrentLine,
+            (firstWhiteSpaceAfterCurrentLine >= 0 ? firstWhiteSpaceAfterCurrentLine : text.Length) - startIndexOfCurrentLine);
+
+        if (lines.Count == 0 && font.MeasureText(currentLine) > maxWidth)
+          break;
+
+        lines.Enqueue(currentLine);
+        startIndexOfCurrentLine = firstWhiteSpaceAfterCurrentLine + 1;
       }
-    }
-
-    if (lines.Count == 0)
-    {
-      var firstWhitespaceAfterFirstLine = text.IndexOf(' ', text.Length / 3);
-      var firstLine = text.Substring(0, firstWhitespaceAfterFirstLine);
-      var startIndexOfSecondLine = firstWhitespaceAfterFirstLine + 1;
-
-      var firstWhitespaceAfterSecondLine = text.IndexOf(' ', startIndexOfSecondLine + text.Length / 3);
-      var secondLine = text.Substring(startIndexOfSecondLine, firstWhitespaceAfterSecondLine);
-
-      var thirdLine = text.Substring(firstWhitespaceAfterSecondLine + 1);
-
-      lines.Enqueue(firstLine);
-      lines.Enqueue(secondLine);
-      lines.Enqueue(thirdLine);
     }
 
     var textHeight = font.Metrics.CapHeight + (lines.Count - 1) * font.Spacing;
