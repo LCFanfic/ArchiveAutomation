@@ -68,12 +68,12 @@ public class Program
 
   private static float DrawWrappedText (SKCanvas canvas, string text, SKRect rect, SKTextAlign textAlign, SKFont font, SKColor[] colors)
   {
+    var maxWidth = rect.Size.Width * 0.8;
     var lines = new Queue<string>();
-
     const int c_maxLines = 3;
+
     for (int lineCount = 1; lineCount <= c_maxLines && lines.Count == 0; lineCount++)
     {
-      var maxWidth = lineCount < c_maxLines ? rect.Size.Width * 0.8 : rect.Size.Width;
       var startIndexOfCurrentLine = 0;
       for (int i = 1; i <= lineCount; i++)
       {
@@ -85,7 +85,9 @@ public class Program
             startIndexOfCurrentLine,
             (firstWhiteSpaceAfterCurrentLine >= 0 ? firstWhiteSpaceAfterCurrentLine : text.Length) - startIndexOfCurrentLine);
 
-        if (lines.Count == 0 && font.MeasureText(currentLine) > maxWidth)
+        var isLastChance = lineCount == c_maxLines;
+        var isFirstLine = lines.Count == 0;
+        if (!isLastChance && isFirstLine && font.MeasureText(currentLine) > maxWidth)
           break;
 
         lines.Enqueue(currentLine);
