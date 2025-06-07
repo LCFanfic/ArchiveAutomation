@@ -145,7 +145,12 @@ public class Program
     }
 
     canvas.DrawBitmap(fanartBitmap, fanartArea);
-    if (fanartBitmap.GetPixel(0, 0).Alpha == 255)
+    var hasTransparentCorner
+        = fanartBitmap.GetPixel(x:0, y:0).Alpha == 255 
+            || fanartBitmap.GetPixel(x:0, y:fanartBitmap.Height).Alpha == 255
+            || fanartBitmap.GetPixel(x:fanartBitmap.Width, y:0).Alpha == 255
+            || fanartBitmap.GetPixel(x:fanartBitmap.Width, y:fanartBitmap.Height).Alpha == 255;
+    if (hasTransparentCorner)
     {
       canvas.DrawRect(
           new SKRect(left: fanartArea.Left - 1, right: fanartArea.Right + 1, top: fanartArea.Top - 1, bottom: fanartArea.Bottom + 1),
