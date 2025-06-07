@@ -9,12 +9,12 @@ public class Program
 {
   public static async Task<int> Main (string[] args)
   {
-    var coverTemplatePathOption = new Option<FileInfo>(
+    var coverTemplateOption = new Option<FileInfo>(
         name: "--cover-template",
         description: "The image used as a template for the cover. Must be a PNG or JPG image with a dimension of 800x1280 pixels.");
-    coverTemplatePathOption.AddAlias("-c");
-    coverTemplatePathOption.IsRequired = true;
-    coverTemplatePathOption.AddValidator(ValidateSourceFile);
+    coverTemplateOption.AddAlias("-c");
+    coverTemplateOption.IsRequired = true;
+    coverTemplateOption.AddValidator(ValidateSourceFile);
 
     var fontPathOption = new Option<FileInfo>(
         name: "--font",
@@ -47,21 +47,21 @@ public class Program
     publisherOption.AddAlias("-p");
     publisherOption.IsRequired = true;
 
-    var coverArtPathOption = new Option<FileInfo>(
+    var fanartOption = new Option<FileInfo>(
         name: "--cover-art",
         description: "The cover art to be rendered onto the cover. Must be a PNG or JPG image with a dimension of 700x725 pixels.");
-    coverArtPathOption.AddAlias("-i");
-    coverArtPathOption.IsRequired = true;
-    coverArtPathOption.AddValidator(ValidateSourceFile);
+    fanartOption.AddAlias("-i");
+    fanartOption.IsRequired = true;
+    fanartOption.AddValidator(ValidateSourceFile);
 
     var rootCommand = new RootCommand("Sample app for System.CommandLine");
-    rootCommand.AddOption(coverTemplatePathOption);
+    rootCommand.AddOption(coverTemplateOption);
     rootCommand.AddOption(fontPathOption);
     rootCommand.AddOption(outputFileOption);
     rootCommand.AddOption(titleOption);
     rootCommand.AddOption(authorOption);
     rootCommand.AddOption(publisherOption);
-    rootCommand.AddOption(coverArtPathOption);
+    rootCommand.AddOption(fanartOption);
 
     rootCommand.SetHandler(
         (
@@ -83,13 +83,13 @@ public class Program
               coverArt: coverArt);
           return Task.FromResult(result);
         },
-        coverTemplatePathOption,
+        coverTemplateOption,
         fontPathOption,
         outputFileOption,
         titleOption,
         authorOption,
         publisherOption,
-        coverArtPathOption);
+        fanartOption);
 
     return await rootCommand.InvokeAsync(args);
   }
@@ -114,28 +114,52 @@ public class Program
       string publisher,
       FileInfo coverArt)
   {
-    using var inputStream = coverTemplate.OpenRead();
-    using var bitmap = SKBitmap.Decode(inputStream);
-    using var surface = SKSurface.Create(new SKImageInfo(bitmap.Width, bitmap.Height));
+    var coverHeight = 1280;
+    var coverWidth = 800;
+
+    var bottomOffset = 10;
+    var left = 50;
+    var right = coverWidth - left;
+    var bottom = coverHeight - bottomOffset;
+
+    using var surface = SKSurface.Create(new SKImageInfo(width: coverWidth, height: coverHeight));
     var canvas = surface.Canvas;
 
-    canvas.DrawBitmap(bitmap, 0, 0);
+    using var coverTemplateBitmap = SKBitmap.Decode(coverTemplate.OpenRead());
+    if (coverTemplateBitmap.Height != coverHeight || coverTemplateBitmap.Width != coverWidth)
+    {
+      Console.Error.WriteLine(
+          $"Expected the cover template to be {coverWidth}x{coverHeight} but was {coverTemplateBitmap.Width}x{coverTemplateBitmap.Height}");
+      return 1;
+    }
+
+    canvas.DrawBitmap(coverTemplateBitmap, 0, 0);
+
+    var fanartArea = new SKRect(left: left, right: right, top: 427, bottom: 427 + 525);
+    using var fanartBitmap = SKBitmap.Decode(coverArt.OpenRead());
+    if (fanartBitmap.Height != (int)fanartArea.Height || fanartBitmap.Width != (int)fanartArea.Width)
+    {
+      Console.Error.WriteLine(
+          $"Expected the cover art to be {fanartArea.Width}x{fanartArea.Height} but was {fanartBitmap.Width}x{fanartBitmap.Height}");
+      return 1;
+    }
+
+    canvas.DrawBitmap(fanartBitmap, fanartArea);
+    if (fanartBitmap.GetPixel(0, 0).Alpha == 255)
+    {
+      canvas.DrawRect(
+          new SKRect(left: fanartArea.Left - 1, right: fanartArea.Right + 1, top: fanartArea.Top - 1, bottom: fanartArea.Bottom + 1),
+          new SKPaint { Color = new SKColor(47, 47, 47, alpha: 255), StrokeWidth = 2, Style = SKPaintStyle.Stroke });
+    }
 
     using var typeface = SKTypeface.FromFile(fontFile.FullName);
     using SKFont fontTitle = new SKFont(typeface, size: 64);
     using SKFont fontAuthor = new SKFont(typeface, size: 36);
     using SKFont fontPublisher = new SKFont(typeface, size: 24);
 
-    var bottomOffset = 10;
-
-    var left = 50;
-    var right = 800 - left;
-    var bottom = 1280 - bottomOffset;
-    var fanart = new SKRect(left: left, right: right, top: 427, bottom: 427 + 525);
-
     var colors = new[] { new SKColor(50, 80, 220), new SKColor(200, 200, 232) };
 
-    var titleArea = new SKRect(left: left, right: right, top: fanart.Bottom + 1, bottom: bottom - fontAuthor.Spacing - fontPublisher.Spacing);
+    var titleArea = new SKRect(left: left, right: right, top: fanartArea.Bottom + 1, bottom: bottom - fontAuthor.Spacing - fontPublisher.Spacing);
     var titleBottom = DrawWrappedText(canvas, title, titleArea, SKTextAlign.Center, fontTitle, colors);
 
     var authorArea = new SKRect(left: left, right: right, top: titleBottom + 1, bottom: titleBottom + fontAuthor.Spacing);
