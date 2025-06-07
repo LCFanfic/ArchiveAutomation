@@ -27,15 +27,22 @@ public class Program
     using SKFont fontAuthor = new SKFont(typeface, size: 36);
     using SKFont fontPublisher = new SKFont(typeface, size: 24);
 
+    var bottomOffset = 10;
+
+    var left = 50;
+    var right = 800 - left;
+    var bottom = 1280 - bottomOffset;
+    var fanart = new SKRect(left: left, right: right, top: 427, bottom: 427 + 525);
+
     var colors = new[] { new SKColor(50, 80, 220), new SKColor (200, 200, 232)};
 
-    var titleArea = new SKRect(left: 50, top: 980, right: 750, bottom: 1158);
-    DrawWrappedText (canvas,  title, titleArea, SKTextAlign.Center, fontTitle, colors);
+    var titleArea = new SKRect(left: left, right: right, top: fanart.Bottom + 1, bottom: bottom - fontAuthor.Spacing - fontPublisher.Spacing);
+    var titleBottom = DrawWrappedText (canvas,  title, titleArea, SKTextAlign.Center, fontTitle, colors);
 
-    var authorArea = new SKRect(left: 50, top: 1166, right: 750, bottom: 1206);
+    var authorArea = new SKRect(left: left, right: right, top: titleBottom + 1, bottom: titleBottom + fontAuthor.Spacing);
     DrawSingleLineText(canvas, author, authorArea, SKTextAlign.Center, fontAuthor, SKColors.White);
 
-    var publisherArea = new SKRect(left: 50, top: 1230, right: 750, bottom: 1280);
+    var publisherArea = new SKRect(left: left, right: right, top: bottom + 1 - fontPublisher.Spacing, bottom: bottom);
     DrawSingleLineText(canvas, publisher, publisherArea, SKTextAlign.Center, fontPublisher, SKColors.White);
 
     using var image = surface.Snapshot();
@@ -56,79 +63,81 @@ public class Program
     var baseline = rect.Bottom - ((rect.Height - font.Metrics.XMax) / 2);
 
     using var paint = new SKPaint { IsAntialias = true, Color = color };
-    canvas.DrawText(text, rect.MidX, baseline, SKTextAlign.Center, font, paint);
+    canvas.DrawText(text, rect.MidX, baseline, textAlign, font, paint);
   }
 
-  private static void DrawWrappedText (SKCanvas canvas, string text, SKRect rect, SKTextAlign textAlign, SKFont font, SKColor[] colors)
+  private static float DrawWrappedText (SKCanvas canvas, string text, SKRect rect, SKTextAlign textAlign, SKFont font, SKColor[] colors)
   {
     var lines = new Queue<string>();
 
-    // float lineLength = 0;
-    // float spaceWidth = font.MeasureText(" ");
-    // var words = new Queue<string>();
-    // foreach (var word in text.Split(' '))
-    // {
-    //   float wordWidth = font.MeasureText(word);
-    //   lineLength += spaceWidth;
-    //   lineLength += wordWidth;
-    //   if (lineLength > rect.Size.Width)
-    //   {
-    //     lines.Enqueue(string.Join(" ", words));
-    //     lineLength = 0;
-    //     words.Clear();
-    //   }
-    //
-    //   words.Enqueue(word);
-    // }
-    //
-    // lines.Enqueue(string.Join(" ", words));
-
-    float textWidth = font.MeasureText(text);
-    if (textWidth < rect.Size.Width * 0.8)
+    if (font.MeasureText(text) < rect.Size.Width * 0.8)
     {
       lines.Enqueue(text);
     }
-    else
+
+    if (lines.Count == 0)
     {
-      var halfwayPoint = text.Length / 2;
-      var firstWhitespaceAfterHalfwayPoint = text.IndexOf(' ', halfwayPoint);
-      var firstWhitespaceBeforeHalfwayPoint = text.LastIndexOf(' ', halfwayPoint);
+      var firstWhitespaceAfterHalfwayPoint = text.IndexOf(' ', text.Length / 2);
       var firstLine = text.Substring(0, firstWhitespaceAfterHalfwayPoint);
       var secondLine = text.Substring(firstWhitespaceAfterHalfwayPoint + 1);
-      lines.Enqueue(firstLine);
-      lines.Enqueue(secondLine);
+      if (font.MeasureText(firstLine) < rect.Size.Width * 0.8)
+      {
+        lines.Enqueue(firstLine);
+        lines.Enqueue(secondLine);
+      }
     }
 
-    float wordY = rect.Top + font.Metrics.XMax;
-    if (lines.Count == 1)
-      wordY += font.Metrics.XMax;
+    if (lines.Count == 0)
+    {
+      var firstWhitespaceAfterFirstLine = text.IndexOf(' ', text.Length / 3);
+      var firstLine = text.Substring(0, firstWhitespaceAfterFirstLine);
+      var startIndexOfSecondLine = firstWhitespaceAfterFirstLine + 1;
 
+      var firstWhitespaceAfterSecondLine = text.IndexOf(' ', startIndexOfSecondLine + text.Length / 3);
+      var secondLine = text.Substring(startIndexOfSecondLine, firstWhitespaceAfterSecondLine);
+
+      var thirdLine = text.Substring(firstWhitespaceAfterSecondLine + 1);
+
+      lines.Enqueue(firstLine);
+      lines.Enqueue(secondLine);
+      lines.Enqueue(thirdLine);
+    }
+
+    var textHeight = font.Metrics.CapHeight + (lines.Count - 1) * font.Spacing;
+    var remainingSpace = rect.Height - textHeight;
+    var textTop = rect.Top + remainingSpace / 2;
+
+    float baseline = textTop + font.Metrics.CapHeight;
+
+    var shadowWith = (int) Math.Ceiling(font.Metrics.XMax * (5 / 100f));
     foreach (var line in lines)
     {
-      for (int i = 1; i <= 4; i++)
+      for (int i = 1; i <= shadowWith; i++)
       {
         using var shadowFilter = SKImageFilter.CreateDropShadowOnly(
-            dx: (float)(Math.Floor(font.Metrics.XMax * 0.01f) + i),
-            dy: (float)(Math.Floor(font.Metrics.XMax * 0.01f) + i),
+            dx: i,
+            dy: i,
             sigmaX: 0,
             sigmaY: 0,
             color: SKColors.Black,
             input: null
             );
         using var shadowPaint = new SKPaint { IsAntialias = true, ImageFilter = shadowFilter };
-        canvas.DrawText(line, rect.MidX, wordY, textAlign, font, shadowPaint);
+        canvas.DrawText(line, rect.MidX, baseline, textAlign, font, shadowPaint);
       }
 
       using var shader = SKShader.CreateLinearGradient(
-          start: new SKPoint(0, wordY - font.Metrics.CapHeight),
-          end: new SKPoint(0, wordY + font.Metrics.Bottom),
+          start: new SKPoint(0, baseline - font.Metrics.CapHeight),
+          end: new SKPoint(0, baseline + font.Metrics.Bottom),
           colors,
           null,
           SKShaderTileMode.Clamp);
       using var paint = new SKPaint { IsAntialias = true, Shader = shader };
-      canvas.DrawText(line, rect.MidX, wordY, textAlign, font, paint);
-      wordY += font.Spacing;
+      canvas.DrawText(line, rect.MidX, baseline, textAlign, font, paint);
+      baseline += font.Spacing;
     }
+
+    return baseline - font.Spacing + font.Metrics.Bottom;
   }
 
 }
