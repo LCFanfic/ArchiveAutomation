@@ -160,6 +160,8 @@ function Pandoc(doc)
 
   if title then
     yaml_frontmatter = yaml_frontmatter .. "title: >\n" .. wrap_text(title, 80, 4) .. "\n"
+  else
+    io.stderr:write("Warning: No title was found.\n")
   end
 
   if author then
@@ -170,17 +172,23 @@ function Pandoc(doc)
       yaml_frontmatter = yaml_frontmatter .. "  - name: "  .. v.name .. "\n"
       yaml_frontmatter = yaml_frontmatter .. "    email: " .. v.email .. "\n"
       yaml_frontmatter = yaml_frontmatter .. "    url: "   .. v.url .. "\n"
-    end  
+    end
+  else
+    io.stderr:write("Warning: No author was found.\n")
   end
 
   if rating then
     yaml_frontmatter = yaml_frontmatter .. "rating: " .. rating .. "\n"
+  else
+    io.stderr:write("Warning: No rating was found.\n")
   end
 
   if submission_date then
     local parsed_date = parse_date(submission_date)
     yaml_frontmatter = yaml_frontmatter .. "date: " .. string.format("%04d-%02d-%02d", parsed_date.year, parsed_date.month, parsed_date.day) .. "\n"
     yaml_frontmatter = yaml_frontmatter .. "dateformatted: " .. submission_date .. "\n"
+  else
+    io.stderr:write("Warning: No submission date was found.\n")
   end
 
   local length_in_words = count_words_in_doc(doc)
@@ -203,6 +211,8 @@ function Pandoc(doc)
 
   if summary then
     yaml_frontmatter = yaml_frontmatter .. "summary: >\n" .. wrap_text(summary, 80, 4) .. "\n"
+  else
+    io.stderr:write("Warning: No summary was found.\n")
   end
 
   yaml_frontmatter = yaml_frontmatter .. "---\n"
