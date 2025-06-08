@@ -117,7 +117,7 @@ public class Program
     var coverHeight = 1280;
     var coverWidth = 800;
 
-    var bottomOffset = 10;
+    var bottomOffset = 25;
     var left = 50;
     var right = coverWidth - left;
     var bottom = coverHeight - bottomOffset;
@@ -164,13 +164,15 @@ public class Program
 
     var colors = new[] { new SKColor(50, 80, 220), new SKColor(200, 200, 232) };
 
-    var titleArea = new SKRect(left: left, right: right, top: fanartArea.Bottom + 1, bottom: bottom - fontAuthor.Spacing - fontPublisher.Spacing);
+    var authorReservedHeight = fontAuthor.Spacing;
+    var publisherReservedHeight = Math.Abs(fontPublisher.Metrics.Ascent);
+    var titleArea = new SKRect(left: left, right: right, top: fanartArea.Bottom + 1, bottom: bottom - authorReservedHeight - publisherReservedHeight);
     var titleBottom = DrawWrappedText(canvas, title, titleArea, SKTextAlign.Center, fontTitle, colors);
 
-    var authorArea = new SKRect(left: left, right: right, top: titleBottom + 1, bottom: titleBottom + fontAuthor.Spacing);
+    var authorArea = new SKRect(left: left, right: right, top: titleBottom + 1, bottom: titleBottom + authorReservedHeight);
     DrawSingleLineText(canvas, author, authorArea, SKTextAlign.Center, fontAuthor, SKColors.White);
 
-    var publisherArea = new SKRect(left: left, right: right, top: bottom + 1 - fontPublisher.Spacing, bottom: bottom);
+    var publisherArea = new SKRect(left: left, right: right, top: bottom - publisherReservedHeight, bottom: bottom);
     DrawSingleLineText(canvas, publisher, publisherArea, SKTextAlign.Center, fontPublisher, SKColors.White);
 
     using var image = surface.Snapshot();
@@ -224,6 +226,9 @@ public class Program
         startIndexOfCurrentLine = firstWhiteSpaceAfterCurrentLine + 1;
       }
     }
+
+    if (lines.Count >= 2)
+      font.Size = (int)(font.Size * 0.85f);
 
     var textHeight = font.Metrics.CapHeight + (lines.Count - 1) * font.Spacing;
     var remainingSpace = rect.Height - textHeight;
