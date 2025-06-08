@@ -200,35 +200,69 @@ public class Program
 
   private static float DrawWrappedText (SKCanvas canvas, string text, SKRect rect, SKTextAlign textAlign, SKFont font, SKColor[] colors)
   {
-    var maxWidth = rect.Size.Width * 0.8;
+    var defaultFontSize = font.Size;
+    var reducedFontSize = (int)(font.Size * 0.85f);
+
+    var defaultMaxWidth = rect.Size.Width * 0.8f;
+    var expandedMaxWidth = rect.Size.Width;
+
     var lines = new Queue<string>();
     const int c_maxLines = 3;
 
-    for (int lineCount = 1; lineCount <= c_maxLines && lines.Count == 0; lineCount++)
+    if (font.MeasureText(text) <= defaultMaxWidth)
     {
-      var startIndexOfCurrentLine = 0;
-      for (int i = 1; i <= lineCount; i++)
+      lines.Enqueue(text);
+    }
+
+    if (lines.Count == 0 && text.Contains(": "))
+    {
+      var parts = text.Split(": ", count: c_maxLines);
+
+      // Restore ":" at end of lines.
+      for (int i = 0; i < parts.Length - 1; i++)
+        parts[i] = string.Concat(parts[i], ":");
+
+      if (parts.Length == c_maxLines)
+        font.Size = reducedFontSize;
+
+      var maxWidth = (parts.Length < c_maxLines ? defaultMaxWidth : expandedMaxWidth);
+      if (parts.All(part => font.MeasureText(part) <= maxWidth))
       {
-        var startIndexForFirstWhitespaceAfterCurrentLine = startIndexOfCurrentLine + text.Length / lineCount;
-        var firstWhiteSpaceAfterCurrentLine =
-            startIndexForFirstWhitespaceAfterCurrentLine < text.Length ? text.IndexOf(' ', startIndexForFirstWhitespaceAfterCurrentLine) : -1;
+        foreach (var part in parts)
+          lines.Enqueue(part);
+      }
 
-        var currentLine = text.Substring(
-            startIndexOfCurrentLine,
-            (firstWhiteSpaceAfterCurrentLine >= 0 ? firstWhiteSpaceAfterCurrentLine : text.Length) - startIndexOfCurrentLine);
+      font.Size = defaultFontSize;
+    }
 
-        var isLastChance = lineCount == c_maxLines;
-        var isFirstLine = lines.Count == 0;
-        if (!isLastChance && isFirstLine && font.MeasureText(currentLine) > maxWidth)
-          break;
+    if (lines.Count == 0)
+    {
+      for (int lineCount = 1; lineCount <= c_maxLines && lines.Count == 0; lineCount++)
+      {
+        var startIndexOfCurrentLine = 0;
+        for (int i = 1; i <= lineCount; i++)
+        {
+          var startIndexForFirstWhitespaceAfterCurrentLine = startIndexOfCurrentLine + text.Length / lineCount;
+          var firstWhiteSpaceAfterCurrentLine =
+              startIndexForFirstWhitespaceAfterCurrentLine < text.Length ? text.IndexOf(' ', startIndexForFirstWhitespaceAfterCurrentLine) : -1;
 
-        lines.Enqueue(currentLine);
-        startIndexOfCurrentLine = firstWhiteSpaceAfterCurrentLine + 1;
+          var currentLine = text.Substring(
+              startIndexOfCurrentLine,
+              (firstWhiteSpaceAfterCurrentLine >= 0 ? firstWhiteSpaceAfterCurrentLine : text.Length) - startIndexOfCurrentLine);
+
+          var isLastChance = lineCount == c_maxLines;
+          var isFirstLine = lines.Count == 0;
+          if (!isLastChance && isFirstLine && font.MeasureText(currentLine) > defaultMaxWidth)
+            break;
+
+          lines.Enqueue(currentLine);
+          startIndexOfCurrentLine = firstWhiteSpaceAfterCurrentLine + 1;
+        }
       }
     }
 
     if (lines.Count >= 2)
-      font.Size = (int)(font.Size * 0.85f);
+      font.Size = reducedFontSize;
 
     var textHeight = font.Metrics.CapHeight + (lines.Count - 1) * font.Spacing;
     var remainingSpace = rect.Height - textHeight;
