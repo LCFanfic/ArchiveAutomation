@@ -32,15 +32,14 @@ function Meta(meta)
     elseif #formatted_author_names_array == 1 then
       formatted_author_names_string = formatted_author_names_array[1]
     elseif #formatted_author_names_array == 2 then
-      formatted_author_names_string = formatted_author_names_array[1] .. "and " .. formatted_author_names_array[2]
+      formatted_author_names_string = formatted_author_names_array[1] .. " and " .. formatted_author_names_array[2]
     else
       formatted_author_names_string = table.concat(formatted_author_names_array, ", ", 1, #formatted_author_names_array-1)
-                                 .. ", and " .. formatted_author_names_array[#formatted_author_names_array]
+                                      .. ", and " .. formatted_author_names_array[#formatted_author_names_array]
 	  end
 
     meta.authors_formatted = pandoc.RawInline("markdown", formatted_authors_string)
     meta.authornames_formatted = pandoc.RawInline("markdown", formatted_author_names_string)
   end
-
   return meta
 end
