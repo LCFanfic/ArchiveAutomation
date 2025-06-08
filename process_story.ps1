@@ -234,13 +234,13 @@ New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputPdf  -Parent)
 
 Write-Output "Processing '$storyfile'..."
 
-pandoc "$storyfile" --standalone -t markdown_strict -o "$storyMarkdown" --lua-filter="$processSubmissionLuaFilter" -M authorstable="$AuthorsFile" -M filename="$storyID"
+pandoc "$storyfile" --standalone -o "$storyMarkdown" --eol=lf --to=markdown_strict --lua-filter="$processSubmissionLuaFilter" -M authorstable="$AuthorsFile" -M filename="$storyID"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
 }
 
-pandoc "$storyMarkdown" --standalone -o "$metadataJson" --to plain --lua-filter="$getMetadataJsonLuaFilter" --template="$metadataJsonTemplate"
+pandoc "$storyMarkdown" --standalone -o "$metadataJson" --eol=lf --to=plain --lua-filter="$getMetadataJsonLuaFilter" --template="$metadataJsonTemplate"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for metadata output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
@@ -267,7 +267,7 @@ if ($LASTEXITCODE -ne 0) {
   exit $LASTEXITCODE
 }
 
-&pandoc "$storyMarkdown" --standalone -o "$outputHtml" `
+&pandoc "$storyMarkdown" --standalone -o "$outputHtml" --eol=lf `
   --lua-filter="$authorsLuaFilter" `
   --lua-filter="$extractPrefaceLuaFilter" `
   --lua-filter="$headingFinderLuaFilter" `
@@ -281,14 +281,14 @@ if ($LASTEXITCODE -ne 0) {
 Write-Output "Created HTML format: '$outputHtml'."
 
 # Use a temporary markdown file for structuring the output files
-pandoc "$storyMarkdown" --standalone -o "$inputOfficeMarkdown" --lua-filter="$authorsLuaFilter" --template="$officeTemplate"
+pandoc "$storyMarkdown" --standalone -o "$inputOfficeMarkdown" --eol=lf --lua-filter="$authorsLuaFilter" --template="$officeTemplate"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing for intermediate office format failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
 }
 
 # Use a temporary markdown file for structuring the output files
-pandoc "$storyMarkdown" --standalone -o "$inputEbookMarkdown" --lua-filter="$authorsLuaFilter" --lua-filter="$extractPrefaceLuaFilter" --lua-filter="$headingFinderLuaFilter" --template="$ebookTemplate"
+pandoc "$storyMarkdown" --standalone -o "$inputEbookMarkdown" --eol=lf --lua-filter="$authorsLuaFilter" --lua-filter="$extractPrefaceLuaFilter" --lua-filter="$headingFinderLuaFilter" --template="$ebookTemplate"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing for intermediate office format failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
@@ -308,14 +308,14 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Output "Created ODT format:  '$outputOdt'."
 
-pandoc "$inputOfficeMarkdown" --standalone -o "$outputTxt" -t plain -f markdown-smart --columns=65 --lua-filter="$customHRLuaFilter" --lua-filter="$escapePlaintextLuaFilter"
+pandoc "$inputOfficeMarkdown" --standalone -o "$outputTxt" --eol=lf --to=plain -f markdown-smart --columns=65 --lua-filter="$customHRLuaFilter" --lua-filter="$escapePlaintextLuaFilter"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for TXT output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
 }
 Write-Output "Created TXT format:  '$outputTxt'."
 
-pandoc "$inputEbookMarkdown"  --standalone -o "$outputEpub" --lua-filter="$customHRLuaFilter" --css="$epubCssFile" --epub-cover-image="$ebookCover" --epub-title-page=false
+pandoc "$inputEbookMarkdown"  --standalone -o "$outputEpub" --eol=lf --lua-filter="$customHRLuaFilter" --css="$epubCssFile" --epub-cover-image="$ebookCover" --epub-title-page=false
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for EPUB output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
