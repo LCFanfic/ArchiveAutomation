@@ -259,7 +259,13 @@ if ($LASTEXITCODE -ne 0) {
   exit $LASTEXITCODE
 }
 
-pandoc "$storyMarkdown" --standalone -o "$outputHtml" --lua-filter="$authorsLuaFilter" --lua-filter="$websiteAdjustmentLuaFilter" --lua-filter="$customHRLuaFilter" --template="$htmlTemplate"
+&pandoc "$storyMarkdown" --standalone -o "$outputHtml" `
+  --lua-filter="$authorsLuaFilter" `
+  --lua-filter="$extractPrefaceLuaFilter" `
+  --lua-filter="$headingFinderLuaFilter" `
+  --lua-filter="$customHRLuaFilter" `
+  --lua-filter="$websiteAdjustmentLuaFilter" `
+  --template="$htmlTemplate"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for HTML output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
@@ -294,7 +300,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Output "Created ODT format:  '$outputOdt'."
 
-pandoc "$inputOfficeMarkdown" --standalone -o "$outputTxt" -t plain -f markdown-smart --columns=65 --lua-filter="$customHRLuaFilter"  --lua-filter="$escapePlaintextLuaFilter"
+pandoc "$inputOfficeMarkdown" --standalone -o "$outputTxt" -t plain -f markdown-smart --columns=65 --lua-filter="$customHRLuaFilter" --lua-filter="$escapePlaintextLuaFilter"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for TXT output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE

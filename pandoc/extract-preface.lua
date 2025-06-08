@@ -17,6 +17,14 @@ function Para(el)
   return el
 end
 
+function Header(el)
+  if not found_break then  
+    found_break = true
+  end
+
+  return el  
+end
+
 function HorizontalRule(el)
   if not found_break then  
     found_break = true
