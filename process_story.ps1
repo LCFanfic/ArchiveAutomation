@@ -209,6 +209,8 @@ if ($storyID -match "\s") {
   exit 1
 }
 
+# For testing and scaling the iamge, use ImageMagick (https://imagemagick.org)
+
 $storyMarkdown =       Join-Path -Path $TempFolder   -ChildPath "$storyID.md"
 $metadataJson =        Join-Path -Path $TempFolder   -ChildPath "$storyID.json"
 $inputOfficeMarkdown = Join-Path -Path $TempFolder   -ChildPath "$storyID-office.md"
