@@ -30,6 +30,7 @@ Set-StrictMode -Version 2
 $pandocFolder = Join-Path -Path $PSScriptRoot -ChildPath "pandoc"
 
 $processSubmissionLuaFilter = Join-Path -Path $pandocFolder -ChildPath "process-submission.lua"
+$getMetadataJsonLuaFilter   = Join-Path -Path $pandocFolder -ChildPath "get-metadata-as-json.lua"
 $customHRLuaFilter          = Join-Path -Path $pandocFolder -ChildPath "custom-hr.lua"
 $authorsLuaFilter           = Join-Path -Path $pandocFolder -ChildPath "authors.lua"
 $websiteAdjustmentLuaFilter = Join-Path -Path $pandocFolder -ChildPath "website-adjustment.lua"
@@ -37,6 +38,7 @@ $extractPrefaceLuaFilter    = Join-Path -Path $pandocFolder -ChildPath "extract-
 $headingFinderLuaFilter     = Join-Path -Path $pandocFolder -ChildPath "heading-finder.lua"
 $escapePlaintextLuaFilter   = Join-Path -Path $pandocFolder -ChildPath "escape-plaintext.lua"
 
+$metadataJsonTemplate       = Join-Path -Path $pandocFolder -ChildPath "metadata-template.json"
 $htmlTemplate               = Join-Path -Path $pandocFolder -ChildPath "story-template.html"
 $officeTemplate             = Join-Path -Path $pandocFolder -ChildPath "story-template-office.md"
 $ebookTemplate              = Join-Path -Path $pandocFolder -ChildPath "story-template-ebook.md"
@@ -47,6 +49,16 @@ $odtReferenceFile           = Join-Path -Path $pandocFolder -ChildPath "pandoc-r
 
 $epubCssFile                = Join-Path -Path $pandocFolder -ChildPath "style.css"
 $fontsFolder                = Join-Path -Path $pandocFolder -ChildPath "fonts"
+
+if (-not (Test-Path $processSubmissionLuaFilter -PathType Leaf)) {
+  Write-Error "Error: File '$processSubmissionLuaFilter' does not exist."
+  exit 1
+}
+
+if (-not (Test-Path $getMetadataJsonLuaFilter -PathType Leaf)) {
+  Write-Error "Error: File '$getMetadataJsonLuaFilter' does not exist."
+  exit 1
+}
 
 if (-not (Test-Path $customHRLuaFilter -PathType Leaf)) {
   Write-Error "Error: File '$customHRLuaFilter' does not exist."
@@ -75,6 +87,11 @@ if (-not (Test-Path $headingFinderLuaFilter -PathType Leaf)) {
 
 if (-not (Test-Path $escapePlaintextLuaFilter -PathType Leaf)) {
   Write-Error "Error: File '$escapePlaintextLuaFilter' does not exist."
+  exit 1
+}
+
+if (-not (Test-Path $metadataJsonTemplate -PathType Leaf)) {
+  Write-Error "Error: File '$metadataJsonTemplate' does not exist."
   exit 1
 }
 
@@ -162,6 +179,7 @@ if ($storyID -match "\s") {
 }
 
 $storyMarkdown =       Join-Path -Path $OutputFolder -ChildPath "$storyID.md"
+$metadataJson =        Join-Path -Path $OutputFolder -ChildPath "$storyID.json"
 $inputOfficeMarkdown = Join-Path -Path $OutputFolder -ChildPath "$storyID-office.md"
 $inputEbookMarkdown =  Join-Path -Path $OutputFolder -ChildPath "$storyID-ebook.md"
 $outputHtml =          Join-Path -Path $OutputFolder -ChildPath "$storyID.html"
@@ -177,6 +195,12 @@ Write-Output "Processing '$storyfile'..."
 pandoc "$storyfile" --standalone -t markdown_strict -o "$storyMarkdown" --lua-filter="$processSubmissionLuaFilter" -M authorstable="$AuthorsFile" -M filename="$storyID"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc failed with exit code $LASTEXITCODE."
+  exit $LASTEXITCODE
+}
+
+pandoc "$storyMarkdown" --standalone -o "$metadataJson" --to plain --lua-filter="$getMetadataJsonLuaFilter" --template="$metadataJsonTemplate"
+if ($LASTEXITCODE -ne 0) {
+  Write-Error "Error: Processing the story file via Pandoc for metadata output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
 }
 
@@ -251,5 +275,6 @@ Copy-Item -Path $storyfile -Destination $ArchiveFolder
 $coverartDestinationPath = Join-Path -Path $ArchiveFolder -ChildPath "$storyID$([System.IO.Path]::GetExtension($coverart))"
 Copy-Item -Path $coverart -Destination $coverartDestinationPath
 Copy-Item -Path $storyMarkdown -Destination $ArchiveFolder
+Copy-Item -Path $metadataJson -Destination $ArchiveFolder
 
 Write-Output "Copied story file to '$ArchiveFolder'."
