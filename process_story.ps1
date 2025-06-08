@@ -21,6 +21,11 @@ param (
   [Parameter(Mandatory=$true)]
   [ValidateNotNullOrEmpty()]
   [ValidateScript({Test-Path $_ -PathType Container}, ErrorMessage = "Folder does not exist.")]
+  [string]$TempFolder,
+
+  [Parameter(Mandatory=$true)]
+  [ValidateNotNullOrEmpty()]
+  [ValidateScript({Test-Path $_ -PathType Container}, ErrorMessage = "Folder does not exist.")]
   [string]$OutputFolder
 )
 
@@ -204,10 +209,11 @@ if ($storyID -match "\s") {
   exit 1
 }
 
-$storyMarkdown =       Join-Path -Path $OutputFolder -ChildPath "$storyID.md"
-$metadataJson =        Join-Path -Path $OutputFolder -ChildPath "$storyID.json"
-$inputOfficeMarkdown = Join-Path -Path $OutputFolder -ChildPath "$storyID-office.md"
-$inputEbookMarkdown =  Join-Path -Path $OutputFolder -ChildPath "$storyID-ebook.md"
+$storyMarkdown =       Join-Path -Path $TempFolder   -ChildPath "$storyID.md"
+$metadataJson =        Join-Path -Path $TempFolder   -ChildPath "$storyID.json"
+$inputOfficeMarkdown = Join-Path -Path $TempFolder   -ChildPath "$storyID-office.md"
+$inputEbookMarkdown =  Join-Path -Path $TempFolder   -ChildPath "$storyID-ebook.md"
+$ebookCover =          Join-Path -Path $TempFolder   -ChildPath "$storyID-cover.jpg"
 $outputHtml =          Join-Path -Path $OutputFolder -ChildPath "$storyID.html"
 $outputDocx =          Join-Path -Path $OutputFolder -ChildPath "$storyID.docx"
 $outputOdt =           Join-Path -Path $OutputFolder -ChildPath "$storyID.odt"
@@ -215,7 +221,6 @@ $outputTxt =           Join-Path -Path $OutputFolder -ChildPath "$storyID.txt"
 $outputEpub =          Join-Path -Path $OutputFolder -ChildPath "$storyID.epub"
 $outputMobi =          Join-Path -Path $OutputFolder -ChildPath "$storyID.mobi"
 $outputPdf =           Join-Path -Path $OutputFolder -ChildPath "$storyID.pdf"
-$ebookCover =          Join-Path -Path $OutputFolder -ChildPath "$storyID-cover.jpg"
 
 Write-Output "Processing '$storyfile'..."
 
@@ -319,12 +324,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Output "Created PDF format:  '$outputPdf'."
 
-Copy-Item -Path $storyfile -Destination $ArchiveFolder
+Move-Item -Path $storyfile -Destination $ArchiveFolder -Force
 $coverartDestinationPath = Join-Path -Path $ArchiveFolder -ChildPath "$storyID$([System.IO.Path]::GetExtension($coverArt))"
 if ($coverArt) {
-  Copy-Item -Path $coverArt -Destination $coverartDestinationPath
+  Move-Item -Path $coverArt -Destination $coverartDestinationPath -Force
 }
-Copy-Item -Path $storyMarkdown -Destination $ArchiveFolder
-Copy-Item -Path $metadataJson -Destination $ArchiveFolder
+Move-Item -Path $storyMarkdown -Destination $ArchiveFolder -Force
+Move-Item -Path $metadataJson -Destination $ArchiveFolder -Force
 
-Write-Output "Copied story file to '$ArchiveFolder'."
+Write-Output "Moved story files to '$ArchiveFolder'."
