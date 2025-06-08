@@ -1,4 +1,10 @@
 function Meta(meta)
+  if meta.title and #meta.title == 1 then
+    meta.title = pandoc.Inlines(meta.title[1].content)
+  elseif  meta.title and #meta.title > 1 then
+    print("Title with more than one paragraph detected! This will render incorrectly.")
+  end
+
   if meta.summary and #meta.summary == 1 then
     meta.summary = pandoc.Inlines(meta.summary[1].content)
   elseif  meta.summary and #meta.summary > 1 then
