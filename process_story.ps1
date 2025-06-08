@@ -4,9 +4,8 @@ param (
   [ValidateScript({Test-Path $_ -PathType Leaf}, ErrorMessage = "File does not exist.")]
   [string]$InputFileOne,
 
-  [Parameter(Mandatory=$true)]
-  [ValidateNotNullOrEmpty()]
-  [ValidateScript({Test-Path $_ -PathType Leaf}, ErrorMessage = "File does not exist.")]
+  [Parameter(Mandatory=$false)]
+  [ValidateScript({!$_ -or {Test-Path $_ -PathType Leaf}}, ErrorMessage = "File does not exist.")]
   [string]$InputFileTwo,
 
   [Parameter(Mandatory=$true)]
@@ -49,6 +48,10 @@ $odtReferenceFile           = Join-Path -Path $pandocFolder -ChildPath "pandoc-r
 
 $epubCssFile                = Join-Path -Path $pandocFolder -ChildPath "style.css"
 $fontsFolder                = Join-Path -Path $pandocFolder -ChildPath "fonts"
+$modern735Font              = Join-Path -Path $fontsFolder  -ChildPath "Modern735W03Rom.ttf"
+$coverFolder                = Join-Path -Path $pandocFolder -ChildPath "cover"
+$coverTemplateFile          = Join-Path -Path $coverFolder  -ChildPath "CoverTemplate.png"
+$defaultCoverArtFile        = Join-Path -Path $coverFolder  -ChildPath "DefaultCoverArt-Cape.png"
 
 if (-not (Test-Path $processSubmissionLuaFilter -PathType Leaf)) {
   Write-Error "Error: File '$processSubmissionLuaFilter' does not exist."
@@ -135,6 +138,21 @@ if (-not (Test-Path $fontsFolder -PathType Container)) {
   exit 1
 }
 
+if (-not (Test-Path $modern735Font -PathType Leaf)) {
+  Write-Error "Error: File '$modern735Font' does not exist."
+  exit 1
+}
+
+if (-not (Test-Path $coverTemplateFile -PathType Leaf)) {
+  Write-Error "Error: File '$coverTemplateFile' does not exist."
+  exit 1
+}
+
+if (-not (Test-Path $defaultCoverArtFile -PathType Leaf)) {
+  Write-Error "Error: File '$defaultCoverArtFile' does not exist."
+  exit 1
+}
+
 if (-not (Get-Command "pandoc" -ErrorAction SilentlyContinue)) {
   Write-Error "'pandoc' is not available in system PATH. Install Pandoc (https://pandoc.org/installing.html)."
   exit 1
@@ -150,19 +168,27 @@ if (-not (Get-Command "typst" -ErrorAction SilentlyContinue)) {
   exit 1
 }
 
+if (-not (Get-Command "CoverGenerator.exe" -ErrorAction SilentlyContinue)) {
+  Write-Error "'CoverGenerator.exe' is not available in system PATH. Releases available at https://github.com/LCFanfic/ArchiveAutomation/releases."
+  exit 1
+}
+
 $extensionOne = [System.IO.Path]::GetExtension($InputFileOne).ToLower()
 $extensionTwo = [System.IO.Path]::GetExtension($InputFileTwo).ToLower()
 
 $graphicsExtensions = @(".png", ".jpg")
 
-if ($extensionOne -eq ".docx" -and $graphicsExtensions -contains $extensionTwo) {
+if (-not $InputFileTwo) {
   $storyfile = $InputFileOne
-  $coverart = $InputFileTwo
+  $coverArt = $null
+} elseif ($extensionOne -eq ".docx" -and $graphicsExtensions -contains $extensionTwo) {
+  $storyfile = $InputFileOne
+  $coverArt = $InputFileTwo
 } elseif ($extensionTwo -eq ".docx" -and $graphicsExtensions -contains $extensionOne) {
   $storyfile = $InputFileTwo
-  $coverart = $InputFileOne
+  $coverArt = $InputFileOne
 } else {
-  Write-Error "Error: One file must be a DOCX and the other must be a PNG or JPG."
+  Write-Error "Error: One file must be a DOCX and if a second file is provided, it must be a PNG or JPG."
   exit 1
 }
 
@@ -189,6 +215,7 @@ $outputTxt =           Join-Path -Path $OutputFolder -ChildPath "$storyID.txt"
 $outputEpub =          Join-Path -Path $OutputFolder -ChildPath "$storyID.epub"
 $outputMobi =          Join-Path -Path $OutputFolder -ChildPath "$storyID.mobi"
 $outputPdf =           Join-Path -Path $OutputFolder -ChildPath "$storyID.pdf"
+$ebookCover =          Join-Path -Path $OutputFolder -ChildPath "$storyID-cover.jpg"
 
 Write-Output "Processing '$storyfile'..."
 
@@ -201,6 +228,27 @@ if ($LASTEXITCODE -ne 0) {
 pandoc "$storyMarkdown" --standalone -o "$metadataJson" --to plain --lua-filter="$getMetadataJsonLuaFilter" --template="$metadataJsonTemplate"
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for metadata output failed with exit code $LASTEXITCODE."
+  exit $LASTEXITCODE
+}
+
+$metadata = Get-Content -Raw "$metadataJson" | ConvertFrom-Json
+
+if ($coverArt){
+  $coverArtFile = $coverArt
+}  else {
+  $coverArtFile = $defaultCoverArtFile
+}
+
+&CoverGenerator.exe `
+  --cover-template "$coverTemplateFile" `
+  --font "$modern735Font" `
+  --output "$ebookCover" `
+  --title "$($metadata.title)" `
+  --author "by $($metadata.'authornames-formatted')" `
+  --publisher "Published on the Lois & Clark Fanfic Archive • $(([DateTime]$metadata.date).Year)" `
+  --cover-art "$coverArtFile"
+if ($LASTEXITCODE -ne 0) {
+  Write-Error "Error: Generating the cover file failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
 }
 
@@ -246,7 +294,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Output "Created TXT format:  '$outputTxt'."
 
-pandoc "$inputEbookMarkdown"  --standalone -o "$outputEpub" --lua-filter="$customHRLuaFilter" --css="$epubCssFile" --epub-cover-image="$coverart" --epub-title-page=false
+pandoc "$inputEbookMarkdown"  --standalone -o "$outputEpub" --lua-filter="$customHRLuaFilter" --css="$epubCssFile" --epub-cover-image="$ebookCover" --epub-title-page=false
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error: Processing the story file via Pandoc for EPUB output failed with exit code $LASTEXITCODE."
   exit $LASTEXITCODE
@@ -272,8 +320,10 @@ if ($LASTEXITCODE -ne 0) {
 Write-Output "Created PDF format:  '$outputPdf'."
 
 Copy-Item -Path $storyfile -Destination $ArchiveFolder
-$coverartDestinationPath = Join-Path -Path $ArchiveFolder -ChildPath "$storyID$([System.IO.Path]::GetExtension($coverart))"
-Copy-Item -Path $coverart -Destination $coverartDestinationPath
+$coverartDestinationPath = Join-Path -Path $ArchiveFolder -ChildPath "$storyID$([System.IO.Path]::GetExtension($coverArt))"
+if ($coverArt) {
+  Copy-Item -Path $coverArt -Destination $coverartDestinationPath
+}
 Copy-Item -Path $storyMarkdown -Destination $ArchiveFolder
 Copy-Item -Path $metadataJson -Destination $ArchiveFolder
 
