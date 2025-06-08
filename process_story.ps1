@@ -216,13 +216,21 @@ $metadataJson =        Join-Path -Path $TempFolder   -ChildPath "$storyID.json"
 $inputOfficeMarkdown = Join-Path -Path $TempFolder   -ChildPath "$storyID-office.md"
 $inputEbookMarkdown =  Join-Path -Path $TempFolder   -ChildPath "$storyID-ebook.md"
 $ebookCover =          Join-Path -Path $TempFolder   -ChildPath "$storyID-cover.jpg"
-$outputHtml =          Join-Path -Path $OutputFolder -ChildPath "$storyID.html"
-$outputDocx =          Join-Path -Path $OutputFolder -ChildPath "$storyID.docx"
-$outputOdt =           Join-Path -Path $OutputFolder -ChildPath "$storyID.odt"
-$outputTxt =           Join-Path -Path $OutputFolder -ChildPath "$storyID.txt"
-$outputEpub =          Join-Path -Path $OutputFolder -ChildPath "$storyID.epub"
-$outputMobi =          Join-Path -Path $OutputFolder -ChildPath "$storyID.mobi"
-$outputPdf =           Join-Path -Path $OutputFolder -ChildPath "$storyID.pdf"
+$outputHtml =          Join-Path -Path $OutputFolder -ChildPath "html" | Join-Path -ChildPath "$storyID.html"
+$outputDocx =          Join-Path -Path $OutputFolder -ChildPath "doc"  | Join-Path -ChildPath "$storyID.docx"
+$outputOdt =           Join-Path -Path $OutputFolder -ChildPath "ooo"  | Join-Path -ChildPath "$storyID.odt"
+$outputTxt =           Join-Path -Path $OutputFolder -ChildPath "text" | Join-Path -ChildPath "$storyID.txt"
+$outputEpub =          Join-Path -Path $OutputFolder -ChildPath "epub" | Join-Path -ChildPath "$storyID.epub"
+$outputMobi =          Join-Path -Path $OutputFolder -ChildPath "mobi" | Join-Path -ChildPath "$storyID.mobi"
+$outputPdf =           Join-Path -Path $OutputFolder -ChildPath "pdf"  | Join-Path -ChildPath "$storyID.pdf"
+
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputHtml -Parent) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputDocx -Parent) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputOdt  -Parent) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputTxt  -Parent) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputEpub -Parent) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputMobi -Parent) | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Path $outputPdf  -Parent) | Out-Null
 
 Write-Output "Processing '$storyfile'..."
 
