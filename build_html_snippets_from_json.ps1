@@ -156,7 +156,7 @@ foreach ($story in $byTitle) {
   if ($indexKey -match '[0-9]') {
     $indexKey = '1'
   } elseif ($indexKey -match '[c]') {
-    $indexKey += ($sortableTitle -match 'c[l-z].*' ? 'i' : 'a')
+    $indexKey += ($sortableTitle -match 'c[l-z].*' ? 'l' : 'a')
   } elseif ($indexKey -match '[l]') {
     $indexKey += ($sortableTitle -match 'l[o-z].*' ? 'o' : 'a')
   } elseif ($indexKey -match '[s]') {
