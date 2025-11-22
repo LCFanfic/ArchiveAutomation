@@ -211,16 +211,9 @@ Do not check for errors in the edited files.
 
 "
 foreach ($item in $byAuthor) {
-  $sortableAuthor = $item.author.name.ToLower()
-  $indexKey = $sortableAuthor[0]
-  if ($indexKey -match '[0-9]') {
-    $indexKey = '1'
-  } elseif ($indexKey -match '[b]') {
-    $indexKey += ($sortableAuthor -match 'b[r-z].*' ? 'r' : 'a')
-  } elseif ($indexKey -match '[s]') {
-    $indexKey += ($sortableAuthor -match 's[m-z].*' ? 'm' : 'a')
-  }
-  Add-Content -Path $outputHtmlByAuthor -Value "<!-- author_$indexKey.htm -->"
+  $authorUrl = [System.Uri]::new($item.author.url)
+  $authorFile = [System.IO.Path]::GetFileName($authorUrl.AbsolutePath)
+  Add-Content -Path $outputHtmlByAuthor -Value "<!-- $authorFile -->"
   $output = Convert-StoryMetadataToHtmlSnippet -StoryMetadata $item.story -TemplatePath $htmlByAuthorTemplate
   Add-Content -Path $outputHtmlByAuthor -Value $output
 }
