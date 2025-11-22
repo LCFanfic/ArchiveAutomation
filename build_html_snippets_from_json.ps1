@@ -131,6 +131,18 @@ if (Test-Path $outputHtmlByFilename) {
   Remove-Item -Path $outputHtmlByFilename -Force
 }
 New-Item -Path $outputHtmlByFilename -ItemType File -Force | Out-Null
+Add-Content -Path $outputHtmlByFilename -Value "<!--
+Instructions:
+
+Take the snippets from this file and insert them into the files in the workspace.
+The target files are listed as comments above the snippet.
+Inside the target files, the existing items are listed alphabetically based on the anchor's text.
+The new items should be inserted in the correct alphabetical order.
+Make sure to preserve the HTML structure and formatting.
+Do not check for errors in the edited files.
+-->
+
+"
 foreach ($story in $byFilename) {
   $sortableFilename = $story.filename.ToLower()
   $indexKey = $sortableFilename[0]
@@ -150,6 +162,18 @@ if (Test-Path $outputHtmlByTitle) {
   Remove-Item -Path $outputHtmlByTitle -Force
 }
 New-Item -Path $outputHtmlByTitle -ItemType File -Force | Out-Null
+Add-Content -Path $outputHtmlByTitle -Value "<!--
+Instructions:
+
+Take the snippets from this file and insert them into the files in the workspace.
+The target files are listed as comments above the snippet.
+Inside the target files, the existing items are listed alphabetically based on the anchor's text.
+The new items should be inserted in the correct alphabetical order.
+Make sure to preserve the HTML structure and formatting.
+Do not check for errors in the edited files.
+-->
+
+"
 foreach ($story in $byTitle) {
   $sortableTitle = Remove-Articles -Value $story.title.ToLower()
   $indexKey = $sortableTitle[0]
@@ -173,6 +197,19 @@ if (Test-Path $outputHtmlByAuthor) {
   Remove-Item -Path $outputHtmlByAuthor -Force
 }
 New-Item -Path $outputHtmlByAuthor -ItemType File -Force | Out-Null
+Add-Content -Path $outputHtmlByAuthor -Value "<!--
+Instructions:
+
+Take the snippets from this file and insert them into the files in the workspace.
+The target files are listed as comments above the snippet. 
+The target author is listed as a comment after the anchor element.
+Inside the target files, the existing items are grouped first by author and then alphabetically based on the anchor's text.
+The new items should be inserted with the correct author in the correct alphabetical order.
+Make sure to preserve the HTML structure and formatting.
+Do not check for errors in the edited files.
+-->
+
+"
 foreach ($item in $byAuthor) {
   $sortableAuthor = $item.author.name.ToLower()
   $indexKey = $sortableAuthor[0]
