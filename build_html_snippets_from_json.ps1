@@ -169,6 +169,7 @@ Take the snippets from this file and insert them into the files in the workspace
 The target files are listed as comments above the snippet.
 Inside the target files, the existing items are listed alphabetically based on the anchor's text.
 The new items should be inserted in the correct alphabetical order.
+Note that leading articles such as 'a', 'an', and 'the' should be ignored when determining the alphathical order.
 Make sure to preserve the HTML structure and formatting.
 Do not check for errors in the edited files.
 -->
@@ -204,7 +205,8 @@ Take the snippets from this file and insert them into the files in the workspace
 The target files are listed as comments above the snippet. 
 The target author is listed as a comment after the anchor element.
 Inside the target files, the existing items are grouped first by author and then alphabetically based on the anchor's text.
-The new items should be inserted with the correct author in the correct alphabetical order.
+The new items should be inserted with the correct author in the correct alphabetical order based on the anchor's text.
+Note that leading articles such as 'a', 'an', and 'the' should be ignored when determining the alphathical order.
 Make sure to preserve the HTML structure and formatting.
 Do not check for errors in the edited files.
 -->
