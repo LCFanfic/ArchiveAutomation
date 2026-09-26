@@ -232,12 +232,27 @@ function process_authors (value, authors_table)
     name = name:match("^%W*(.-%.?)%W*$") -- Trim all non-alphanumerics. Keep the trailing period.
     email = string.lower(email:match("^%W*(.-)%W*$")) -- Trim all non-alphanumerics.
 
-    local author = authors_table[email]
+    local author = nil
+    for _, candidate in pairs(authors_table) do
+      if candidate.email and string.lower(candidate.email) == email then
+        author = candidate
+      else
+        for _, secondary in ipairs(candidate["email-secondary"] or {}) do
+          if string.lower(secondary) == email then
+            author = candidate
+            break
+          end
+        end
+      end
+      if author then
+        break
+      end
+    end
+
     if not author then
       io.stderr:write("Warning: No author found for e-mail '" .. email .. "'.\n")
       author = {name = name, email = email, url = ""}
     end
-    author.email = email
 
     table.insert(result, author)
   end
