@@ -179,7 +179,7 @@ foreach ($file in (Get-ChildItem -Path $ArchiveFolder -Filter *.json -File | Sor
   $lines = New-Object System.Collections.Generic.List[string]
   $lines.Add('  "filename": ' + (ConvertTo-JsonString $name))
   $lines.Add('  "formats": [' + (($formats | ForEach-Object { ConvertTo-JsonString $_ }) -join ', ') + ']')
-  $lines.Add('  "url-archive": ' + (ConvertTo-JsonString "http://www.lcfanfic.com/stories/$($uploadDate.Year)/html/$name.html"))
+  $lines.Add('  "url-archive": ' + (ConvertTo-JsonString "https://www.lcfanfic.com/stories/$($uploadDate.Year)/html/$name.html"))
   $lines.Add('  "filesize-kb": ' + [int]$sizeKb)
   $lines.Add('  "word-count": ' + [int]$words)
   $lines.Add('  "title": ' + (ConvertTo-JsonString $title))
