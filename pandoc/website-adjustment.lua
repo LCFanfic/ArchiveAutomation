@@ -22,8 +22,8 @@ function Meta(meta)
 end
 
 function Header(el)
-  -- Level 1: page title
-  -- Level 2: story title on page
-  el.level = el.level + 2
+  -- Level 1: story title
+  -- Level 2: chapter title
+  el.level = el.level + 1
   return el
 end
