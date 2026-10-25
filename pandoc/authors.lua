@@ -9,7 +9,9 @@ function Meta(meta)
         local email = pandoc.utils.stringify(author.email)
         local url = pandoc.utils.stringify(author.url)
 
-        table.insert(formatted_authors_array, "[" .. name .. "](" .. url .. ") <<" .. email .. ">>")
+        local key = author.key and pandoc.utils.stringify(author.key) or ""
+
+        table.insert(formatted_authors_array, "[[" .. name .. "](" .. url .. ") <<" .. email .. ">>]{data-author=\"" .. key .. "\"}")
         table.insert(formatted_author_names_array, name)
       end
     end

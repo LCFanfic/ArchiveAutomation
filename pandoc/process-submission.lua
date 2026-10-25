@@ -169,7 +169,8 @@ function Pandoc(doc)
     local authors = process_authors(author, authors_table)
     yaml_frontmatter = yaml_frontmatter .. "author: \n"
     for _, v in ipairs(authors) do
-      yaml_frontmatter = yaml_frontmatter .. "  - name: "  .. v.name .. "\n"
+      yaml_frontmatter = yaml_frontmatter .. "  - key: "   .. v.key .. "\n"
+      yaml_frontmatter = yaml_frontmatter .. "    name: "  .. v.name .. "\n"
       yaml_frontmatter = yaml_frontmatter .. "    email: " .. v.email .. "\n"
       yaml_frontmatter = yaml_frontmatter .. "    url: "   .. v.url .. "\n"
     end
@@ -233,13 +234,16 @@ function process_authors (value, authors_table)
     email = string.lower(email:match("^%W*(.-)%W*$")) -- Trim all non-alphanumerics.
 
     local author = nil
-    for _, candidate in pairs(authors_table) do
+    local author_key = ""
+    for key, candidate in pairs(authors_table) do
       if candidate.email and string.lower(candidate.email) == email then
         author = candidate
+        author_key = key
       else
         for _, secondary in ipairs(candidate["email-secondary"] or {}) do
           if string.lower(secondary) == email then
             author = candidate
+            author_key = key
             break
           end
         end
@@ -251,10 +255,10 @@ function process_authors (value, authors_table)
 
     if not author then
       io.stderr:write("Warning: No author found for e-mail '" .. email .. "'.\n")
-      author = {name = name, email = email, url = ""}
+      author = {name = name, email = email, url = "", key = ""}
     end
 
-    table.insert(result, author)
+    table.insert(result, {name = author.name, email = author.email, url = author.url, key = author_key})
   end
   return result
 end

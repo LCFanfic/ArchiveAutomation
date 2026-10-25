@@ -18,6 +18,10 @@ function Meta(meta)
     meta.authors_formatted = pandoc.Inlines(pandoc.read(authors_formatted, "markdown").blocks[1].content)
   end
 
+  if meta.authornames_formatted and #meta.authornames_formatted == 1 and meta.authornames_formatted[1].text then
+    meta.authornames_formatted = pandoc.Inlines(pandoc.Str(meta.authornames_formatted[1].text))
+  end
+
   return meta
 end
 

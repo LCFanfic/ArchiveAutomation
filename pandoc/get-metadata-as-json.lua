@@ -9,12 +9,14 @@ function Pandoc(doc)
     local name = pandoc.utils.stringify(author.name)
     local email = pandoc.utils.stringify(author.email)
     local url = pandoc.utils.stringify(author.url)
+    local key = author.key and pandoc.utils.stringify(author.key) or ""
 
     if (#authornames_array > 0) then
       output = output .. ",\n"
     end
 
     output = output .. "    {\n"
+    output = output .. "      \"key\": \"" .. key .. "\",\n"
     output = output .. "      \"name\": \"" .. name .. "\",\n"
     output = output .. "      \"email\": \"" .. email .. "\",\n"
     output = output .. "      \"url\": \"" .. url .. "\"\n"

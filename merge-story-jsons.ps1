@@ -56,30 +56,12 @@ function ConvertTo-JsonString([string]$s) {
   return $sb.ToString()
 }
 
-# ------------------------------------------------------------ author emails ---
+# ------------------------------------------------------------- author keys ---
 
 $authorsPayload = [System.IO.File]::ReadAllText($AuthorsFile, $utf8) | ConvertFrom-Json
-$slugsByEmail = New-Object 'System.Collections.Generic.Dictionary[string,System.Collections.Generic.List[string]]' ([System.StringComparer]::OrdinalIgnoreCase)
+$authorKeys = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
 foreach ($prop in $authorsPayload.PSObject.Properties) {
-  $emails = @()
-  if ($prop.Value.email) {
-    $emails += $prop.Value.email
-  }
-  if ($prop.Value.'email-secondary') {
-    $emails += @($prop.Value.'email-secondary')
-  }
-  foreach ($e in $emails) {
-    $key = $e.Trim()
-    if ($key -eq '') {
-      continue
-    }
-    if (-not $slugsByEmail.ContainsKey($key)) {
-      $slugsByEmail[$key] = New-Object System.Collections.Generic.List[string]
-    }
-    if (-not $slugsByEmail[$key].Contains($prop.Name)) {
-      $slugsByEmail[$key].Add($prop.Name)
-    }
-  }
+  [void]$authorKeys.Add($prop.Name)
 }
 
 # ----------------------------------------------------------- build records ---
@@ -92,6 +74,7 @@ if ($json.Contains("`r`n")) {
 }
 $uploadDate = Get-Date
 $storiesFileName = Split-Path -Path $StoriesFile -Leaf
+$authorsFileName = Split-Path -Path $AuthorsFile -Leaf
 
 $errors = New-Object System.Collections.Generic.List[string]
 $blocks = New-Object System.Collections.Generic.List[string]
@@ -149,17 +132,16 @@ foreach ($file in (Get-ChildItem -Path $ArchiveFolder -Filter *.json -File | Sor
 
   $slugs = New-Object System.Collections.Generic.List[string]
   foreach ($a in @($data.authors)) {
-    $email = ([string]$a.email).Trim()
-    if (-not $slugsByEmail.ContainsKey($email)) {
-      $errors.Add("$($file.Name): no author with email '$email' ($($a.name))")
+    $key = ([string]$a.key).Trim()
+    if ($key -eq '') {
+      $errors.Add("$($file.Name): no author key for '$($a.name)' <$($a.email)>")
       continue
     }
-    $matched = $slugsByEmail[$email]
-    if ($matched.Count -gt 1) {
-      $errors.Add("$($file.Name): email '$email' belongs to $($matched -join ', ')")
+    if (-not $authorKeys.Contains($key)) {
+      $errors.Add("$($file.Name): author key '$key' ($($a.name)) is not in $authorsFileName")
       continue
     }
-    $slugs.Add($matched[0])
+    $slugs.Add($key)
   }
   if ($slugs.Count -eq 0) {
     $errors.Add("$($file.Name): no authors resolved")
