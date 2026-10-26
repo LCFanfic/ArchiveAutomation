@@ -112,6 +112,7 @@ foreach ($file in (Get-ChildItem -Path $ArchiveFolder -Filter *.json -File | Sor
     $errors.Add("$($file.Name): date '$submissionDate' is not yyyy-mm-dd")
     continue
   }
+  $eligibilityYear = [int]$Matches[1] + 1
 
   $rating = ([string]$data.rating) -replace '-', ''
   if ($rating -cnotin @('G', 'PG', 'PG13')) {
@@ -173,6 +174,7 @@ foreach ($file in (Get-ChildItem -Path $ArchiveFolder -Filter *.json -File | Sor
   $lines.Add('  "submission-date": ' + (ConvertTo-JsonString $submissionDate))
   $lines.Add('  "upload-date": ' + (ConvertTo-JsonString $uploadDate.ToString('yyyy-MM-dd')))
   $lines.Add('  "rating": ' + (ConvertTo-JsonString $rating))
+  $lines.Add('  "awards-eligibility": [{ "award": "kerth", "year": ' + $eligibilityYear + ' }]')
   $lines.Add('  "categories": []')
 
   $blocks.Add(' ' + (ConvertTo-JsonString $name) + ": {$nl" + ($lines -join ",$nl") + "$nl }")
